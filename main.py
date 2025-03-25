@@ -89,7 +89,7 @@ st.markdown("""
 # ------------------------------------------------------------------------------
 @st.cache_data
 def load_data():
-    df = pd.read_csv("datas/listings.csv")
+    df = pd.read_csv("listings.csv")
     if 'last_review' in df.columns:
         df['last_review'] = pd.to_datetime(df['last_review'], errors='coerce')
     df['room_type'] = df['room_type'].replace({
@@ -107,7 +107,7 @@ df = load_data()
 # ------------------------------------------------------------------------------
 @st.cache_data
 def load_geojson():
-    with open("datas/neighbourhoods.geojson", "r", encoding="utf-8") as f:
+    with open("neighbourhoods.geojson", "r", encoding="utf-8") as f:
         geojson_data = json.load(f)
     return geojson_data
 
@@ -118,7 +118,7 @@ geojson_data = load_geojson()
 # ------------------------------------------------------------------------------
 @st.cache_data
 def load_monuments():
-    url = "datas/monuments.csv"
+    url = "monuments.csv"
     monuments = pd.read_csv(url, delimiter=',', encoding='latin1')
     
     # Limites géographiques de Paris
@@ -136,7 +136,7 @@ monuments = load_monuments()
 if current_page == "page1":
 
     # Affichage du logo et du titre
-    st.image("datas/logo.png", width=150)  
+    st.image("logo.png", width=150)  
     st.title("Airbnb Paris Dashboard")
     st.markdown("### Analyse interactive des données Airbnb à Paris")
     
