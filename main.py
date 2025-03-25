@@ -208,25 +208,20 @@ if current_page == "page1":
 
     st.markdown("---")
 
-    # Ajouter le lien hypertexte dans les données
-    df_filtered["Lien Airbnb"] = df_filtered["id"].apply(lambda x: f'<a href="https://www.airbnb.fr/rooms/{x}" target="_blank">Voir l’annonce</a>')
-    
-    # Création du graphique avec Plotly
-    fig_map = px.scatter_mapbox(
-            df_filtered,
-            lat="latitude",
-            lon="longitude",
-            hover_name="name",
-            hover_data=["price", "room_type"],
-            color="room_type",
-            zoom=11,
-            height=600,
-            title="Localisation des logements à Paris",
-            labels={"room_type": "Type de logement"},
-            custom_data=["Lien Airbnb"]  # Ajouter le lien hypertexte aux données
-        )
-    
-    # Mise à jour du layout de la carte
+    # Graphique 1 : Carte interactive des logements à Paris
+    fig_map = px.scatter_map(
+        df_filtered,
+        lat="latitude",
+        lon="longitude",
+        hover_name="name",
+        hover_data=["price", "room_type"],
+        color="room_type",
+        zoom=11,
+        height=600,
+        title="Localisation des logements à Paris",
+        labels={"room_type": "Type de logement"}
+    )
+
     fig_map.update_layout(
         title=dict(
             text="Localisation des logements à Paris",
@@ -246,12 +241,7 @@ if current_page == "page1":
         paper_bgcolor="#0E1117",  # Fond général en noir (contours)
         margin=dict(t=40, b=40, l=0, r=0)  # Ajuste les marges pour éviter les bords blancs
     )
-    
-    # Ajouter le lien hypertexte dans le hovertemplate
-    for i, d in enumerate(fig_map.data):
-        d.hovertemplate += "<br>%{customdata[0]}"  # Ajouter le lien Airbnb dans l'info-bulle
-    
-    # Affichage du graphique
+
     st.plotly_chart(fig_map, use_container_width=True)
 
     # Colonnes pour organiser les graphiques côte à côte
