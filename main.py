@@ -243,7 +243,9 @@ if current_page == "page1":
     )
 
     st.plotly_chart(fig_map, use_container_width=True)
-
+    
+    st.markdown("---")
+    
     # Colonnes pour organiser les graphiques côte à côte
     col1, col2 = st.columns(2)
 
@@ -300,7 +302,8 @@ if current_page == "page1":
         )
 
         st.plotly_chart(fig_room, use_container_width=True)
-
+        
+    st.markdown("---")
     # ----------------------------------------------------------------------------
     # Histogramme des prix moyens par arrondissement
     # ----------------------------------------------------------------------------
@@ -331,7 +334,9 @@ if current_page == "page1":
             margin=dict(t=40, b=40, l=0, r=0)  # Ajuste les marges pour éviter les bords blancs
         )
     st.plotly_chart(fig_hist, use_container_width=True)
-
+    
+    st.markdown("---")
+    
     # Moyenne des avis par type de logement
     fig_reviews_type = px.bar(
         df_filtered.groupby("room_type")["number_of_reviews"].median().reset_index(), 
