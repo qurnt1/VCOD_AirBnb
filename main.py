@@ -1,0 +1,483 @@
+import streamlit as st
+import pandas as pd
+import plotly.express as px
+import json
+import warnings
+from geopy.distance import geodesic
+import numpy as np
+import warnings
+
+st.set_page_config(page_title="Airbnb Paris Dashboard", layout="wide")
+
+st.set_option('client.showErrorDetails', False)
+
+
+
+# Style CSS personnalisé
+st.markdown(
+    """
+    <style>
+        /* Mode sombre */
+        html, body {
+            background-color: #0E1117;
+            color: white;
+        }
+
+        /* Titres et texte */
+        h1, h2, h3, h4, h5, h6, p, label {
+            color: white !important;
+        }
+
+        /* Barre de navigation */
+        .nav-links {
+            background-color: #0E1117; /* Couleur de fond de l'app */
+            padding: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .nav-links a {
+            margin: 0 15px;
+            text-decoration: none;
+            font-weight: bold;
+            color: white; /* Texte en blanc */
+            background-color: #ff5d57; /* Fond rose */
+            padding: 10px 20px;  /* Amélioration de la visibilité des boutons */
+            border-radius: 5px;
+            display: inline-block;
+        }
+        .nav-links a:hover {
+            background-color: #e04b45; /* Rose un peu plus foncé au survol */
+        }
+
+        /* Boutons dans Streamlit */
+        .st-emotion-cache-1oy2xl0 {
+            background-color: #238636 !important;
+            color: white !important;
+            font-weight: bold;
+            padding: 10px 20px;
+            border-radius: 5px;
+        }
+
+        .st-emotion-cache-1oy2xl0:hover {
+            background-color: #2EA043 !important;
+        }
+    </style>
+    """, unsafe_allow_html=True
+)
+
+# Détecter le paramètre de l'URL pour déterminer la page active
+query_params = st.experimental_get_query_params()
+
+current_page = query_params.get("page", ["visualisation"])[0]
+
+# Si le paramètre "page" est absent ou mal formé, définir "visualisation" comme page par défaut
+if current_page not in ["page1", "page2", "page3", "page4"]:
+    current_page = "page1"
+
+# Affichage des liens de navigation
+st.markdown("""
+<div class="nav-links">
+    <a href="?page=page1" target="_self">Tableau de Bord</a>
+    <a href="?page=page2" target="_self">Carte Choroplèthe</a>
+    <a href="?page=page3" target="_self">Graphique Small Multiples</a>
+    <a href="?page=page4" target="_self">Distance Monuments</a>
+</div>
+""", unsafe_allow_html=True)
+
+# ------------------------------------------------------------------------------
+# Chargement des données depuis listings.csv (avec mise en cache)
+# ------------------------------------------------------------------------------
+@st.cache_data
+def load_data():
+    df = pd.read_csv("datas/listings.csv")
+    if 'last_review' in df.columns:
+        df['last_review'] = pd.to_datetime(df['last_review'], errors='coerce')
+    df['room_type'] = df['room_type'].replace({
+        'Entire home/apt': 'Appartement entier',
+        'Hotel room': 'Chambre d\'hôtel',
+        'Private room': 'Chambre privée',
+        'Shared room': 'Chambre partagée'
+    })
+    return df
+
+df = load_data()
+
+# ------------------------------------------------------------------------------
+# Chargement du fichier geojson pour les contours des arrondissements
+# ------------------------------------------------------------------------------
+@st.cache_data
+def load_geojson():
+    with open("datas/neighbourhoods.geojson", "r", encoding="utf-8") as f:
+        geojson_data = json.load(f)
+    return geojson_data
+
+geojson_data = load_geojson()
+
+# ------------------------------------------------------------------------------
+# Chargement des données des monuments depuis l'URL
+# ------------------------------------------------------------------------------
+@st.cache_data
+def load_monuments():
+    url = "datas/monuments.csv"
+    monuments = pd.read_csv(url, delimiter=',', encoding='latin1')
+    
+    # Limites géographiques de Paris
+    lat_min, lat_max = 48.815573, 48.902144
+    lon_min, lon_max = 2.224199, 2.469921
+
+    # Filtrer les monuments situés à Paris
+    monuments = monuments[(monuments['latitude'] >= lat_min) & (monuments['latitude'] <= lat_max) &
+                          (monuments['longitude'] >= lon_min) & (monuments['longitude'] <= lon_max)]
+    return monuments
+
+monuments = load_monuments()
+
+# Contenu des pages
+if current_page == "page1":
+
+    # Affichage du logo et du titre
+    st.image("datas/logo.png", width=150)  
+    st.title("Airbnb Paris Dashboard")
+    st.markdown("### Analyse interactive des données Airbnb à Paris")
+    
+    # -------------------------------------------------------------------------------
+    # Sidebar pour afficher les filtres
+    # -------------------------------------------------------------------------------
+    st.sidebar.header("Filtres")
+
+    # Filtre sur le type de logement
+    room_types = df['room_type'].dropna().unique().tolist()
+    selected_room_types = st.sidebar.multiselect("Type de logement", options=room_types, default=room_types)
+    
+    # Filtre sur le prix (slider)
+    min_price = int(df['price'].min())
+    max_price = int(df['price'].max())
+    price_range = st.sidebar.slider("Prix (€)", min_value=min_price, max_value=max_price, 
+                                    value=(min_price, max_price), step=5)
+    
+    # Filtre sur le nombre d'avis (slider)
+    min_reviews = int(df['number_of_reviews'].min())
+    max_reviews = int(df['number_of_reviews'].max())
+    reviews_range = st.sidebar.slider("Nombre d'avis", min_value=min_reviews, max_value=max_reviews, 
+                                    value=(min_reviews, max_reviews), step=1)
+    
+    # Sélection des arrondissements à afficher
+    arrondissement_names = [feature["properties"]["neighbourhood"] for feature in geojson_data["features"]]
+    selected_arrondissements = st.sidebar.multiselect("Arrondissements", options=arrondissement_names, default=arrondissement_names)
+
+    # Sauvegarde des filtres dans un dictionnaire
+    filters = {
+        "selected_room_types": selected_room_types,
+        "price_range": price_range,
+        "reviews_range": reviews_range,
+        "selected_arrondissements": selected_arrondissements
+    }
+
+    # Application des filtres sur le DataFrame
+    df_filtered = df[df['room_type'].isin(filters["selected_room_types"]) &
+                    df['price'].between(filters["price_range"][0], filters["price_range"][1]) &
+                    df['number_of_reviews'].between(filters["reviews_range"][0], filters["reviews_range"][1])]
+
+    # Filtrage des logements selon les arrondissements sélectionnés
+    if filters["selected_arrondissements"]:
+        df_filtered = df_filtered[df_filtered["neighbourhood"].isin(filters["selected_arrondissements"])]
+
+    # -------------------------------------------------------------------------------
+    # Affichage des indicateurs clés
+    # -------------------------------------------------------------------------------
+    st.markdown(f"### Chiffres clés sur les {df_filtered.shape[0]} logements filtrés")
+
+    col1, col2, col3 = st.columns(3)
+    col1.metric("Prix moyen (€)", f"{df_filtered['price'].mean():.2f}")
+    col2.metric("Médiane du prix (€)", f"{df_filtered['price'].median():.2f}")
+    col3.metric("Nombre moyen d'avis par logement", f"{df_filtered['number_of_reviews'].mean():.1f}")
+
+    col4, col5, col6 = st.columns(3)
+    col4.metric("Disponibilité moyenne (jours/an)", f"{df_filtered['availability_365'].mean():.1f}")
+
+    quartier_top = df_filtered['neighbourhood'].mode()[0] if not df_filtered['neighbourhood'].isna().all() else "N/A"
+    col5.metric("Quartier le plus populaire", quartier_top)
+
+    if "calculated_host_listings_count" in df_filtered.columns:
+        taux_reponse_moyen = df_filtered["calculated_host_listings_count"].mean()
+        col6.metric("Taux de réponse moyen (en %)", f"{taux_reponse_moyen:.1f}" if not df_filtered["calculated_host_listings_count"].isna().all() else "N/A")
+
+    col7, _ , _ = st.columns(3)
+    percent_entire_home = (df_filtered["room_type"] == 'Appartement entier').sum() / df_filtered.shape[0] * 100
+    col7.metric("Logements entiers (%)", f"{percent_entire_home:.1f}%")
+
+    st.markdown("---")
+
+    # Graphique 1 : Carte interactive des logements à Paris
+    fig_map = px.scatter_map(
+        df_filtered,
+        lat="latitude",
+        lon="longitude",
+        hover_name="name",
+        hover_data=["price", "room_type"],
+        color="room_type",
+        zoom=11,
+        height=600,
+        title="Localisation des logements à Paris",
+        labels={"room_type": "Type de logement"}
+    )
+
+    fig_map.update_layout(
+        title=dict(
+            text="Localisation des logements à Paris",
+            x=0.5,  # Centrer horizontalement
+            xanchor="center",  # Centrer sur l'axe X
+            font=dict(color="white")  # Titre en blanc
+        ),
+        legend=dict(
+            font=dict(color="white")  # Légende en blanc
+        ),
+        mapbox=dict(
+            style="satellite",  # Utilisation du style satellite de Mapbox
+            center={"lat": df_filtered["latitude"].mean(), "lon": df_filtered["longitude"].mean()},
+            zoom=11
+        ),
+        plot_bgcolor="#0E1117",  # Fond du graphique en noir
+        paper_bgcolor="#0E1117",  # Fond général en noir (contours)
+        margin=dict(t=40, b=40, l=0, r=0)  # Ajuste les marges pour éviter les bords blancs
+    )
+
+    st.plotly_chart(fig_map, use_container_width=True)
+
+    # Colonnes pour organiser les graphiques côte à côte
+    col1, col2 = st.columns(2)
+
+    # Graphique 2 : Box Plot - Distribution des prix par type de logement
+    with col1:
+        fig_price = px.box(
+            df_filtered, 
+            x="room_type", 
+            y="price", 
+            color="room_type",
+            labels={"room_type": "Type de logement", "price": "Prix (€)"}
+        )
+
+        fig_price.update_layout(
+            title=dict(
+                text="Distribution des prix par type de logement",                
+                x=0.5,  # Centrer horizontalement
+                xanchor="center",  # Centrer sur l'axe X
+                font=dict(color="white")  # Titre en blanc
+            ),
+            legend=dict(
+            font=dict(color="white")
+            ),
+            plot_bgcolor="#0E1117",  # Fond du graphique en noir
+            paper_bgcolor="#0E1117",  # Fond général en noir (contours)
+            margin=dict(t=40, b=40, l=0, r=0)  # Ajuste les marges pour éviter les bords blancs
+        )
+
+        st.plotly_chart(fig_price, use_container_width=True)
+
+    # Graphique 3 : Pie Chart - Répartition des types de logement
+    with col2:
+        room_counts = df_filtered['room_type'].value_counts().reset_index()
+        room_counts.columns = ['room_type', 'count']
+        fig_room = px.pie(
+            room_counts, 
+            names='room_type', 
+            values='count'
+        )
+
+        fig_room.update_layout(
+            title=dict(
+                text="Répartition des types de logement",                
+                x=0.5,  # Centrer horizontalement
+                xanchor="center",  # Centrer sur l'axe X
+                font=dict(color="white")  # Titre en blanc
+            ),
+            legend=dict(
+            font=dict(color="white")
+            ),
+            plot_bgcolor="#0E1117",  # Fond du graphique en noir
+            paper_bgcolor="#0E1117",  # Fond général en noir (contours)
+            margin=dict(t=40, b=40, l=0, r=0)  # Ajuste les marges pour éviter les bords blancs
+        )
+
+        st.plotly_chart(fig_room, use_container_width=True)
+
+    # ----------------------------------------------------------------------------
+    # Histogramme des prix moyens par arrondissement
+    # ----------------------------------------------------------------------------
+    prix_moyen_par_arr = df_filtered.groupby("neighbourhood")["price"].median().reset_index()
+
+    prix_moyen_par_arr = prix_moyen_par_arr.sort_values(by="price", ascending=True)  # Trier en décroissant
+    fig_hist = px.bar(
+        prix_moyen_par_arr,
+        x="neighbourhood",
+        y="price",
+        color="price",
+        color_continuous_scale=["lightgreen", "lightblue", "#FF7F7F"],
+        labels={"price": "Prix (€)", "neighbourhood": "Arrondissement"}
+    )
+
+    fig_hist.update_layout(
+            title=dict(
+                text="Prix médian des logements par arrondissement",                
+                x=0.5,  # Centrer horizontalement
+                xanchor="center",  # Centrer sur l'axe X
+                font=dict(color="white")  # Titre en blanc
+            ),
+            legend=dict(
+            font=dict(color="white")
+            ),
+            plot_bgcolor="#0E1117",  # Fond du graphique en noir
+            paper_bgcolor="#0E1117",  # Fond général en noir (contours)
+            margin=dict(t=40, b=40, l=0, r=0)  # Ajuste les marges pour éviter les bords blancs
+        )
+    st.plotly_chart(fig_hist, use_container_width=True)
+
+    # Moyenne des avis par type de logement
+    fig_reviews_type = px.bar(
+        df_filtered.groupby("room_type")["number_of_reviews"].median().reset_index(), 
+        x="room_type", 
+        y="number_of_reviews", 
+        color="room_type",
+        labels={"room_type": "Type de logement", "number_of_reviews": "Nombre médian d'avis"},
+        title="Moyenne des avis par type de logement"
+    )
+
+    fig_reviews_type.update_layout(
+            title=dict(
+                text="Nombre médian d'avis par type de logement",                
+                x=0.5,  # Centrer horizontalement
+                xanchor="center",  # Centrer sur l'axe X
+                font=dict(color="white")  # Titre en blanc
+            ),
+            legend=dict(
+            font=dict(color="white")
+            ),
+            plot_bgcolor="#0E1117",  # Fond du graphique en noir
+            paper_bgcolor="#0E1117",  # Fond général en noir (contours)
+            margin=dict(t=40, b=40, l=0, r=0)  # Ajuste les marges pour éviter les bords blancs
+        )
+    st.plotly_chart(fig_reviews_type, use_container_width=True)
+elif current_page == "page2":
+    st.title("Airbnb Paris Dashboard - Page 2")
+
+    # Calcul des métriques par arrondissement
+    prix_moyen_par_arr = df.groupby("neighbourhood")["price"].mean().reset_index()
+    nombre_logements_par_arr = df["neighbourhood"].value_counts().reset_index()
+    nombre_logements_par_arr.columns = ["neighbourhood", "count"]
+    part_logements_entiers_par_arr = df[df["room_type"] == "Entire home/apt"].groupby("neighbourhood").size().reset_index(name='count')
+    part_logements_entiers_par_arr["part"] = part_logements_entiers_par_arr["count"] / nombre_logements_par_arr["count"]
+
+    # Sélection de la variable à afficher
+    variable = st.selectbox("Choisir la variable à afficher sur la carte", 
+                            ["Prix moyen", "Nombre de logements", "Part de logements entiers"])
+
+    if variable == "Prix moyen":
+        data = prix_moyen_par_arr
+        color = "price"
+        title = "Carte de chaleur des prix moyens par arrondissement"
+    elif variable == "Nombre de logements":
+        data = nombre_logements_par_arr
+        color = "count"
+        title = "Carte de chaleur du nombre de logements par arrondissement"
+    else:
+        data = part_logements_entiers_par_arr
+        color = "part"
+        title = "Carte de chaleur de la part de logements entiers par arrondissement"
+
+    # Carte de chaleur
+    fig_heatmap = px.choropleth_mapbox(
+        data,
+        geojson=geojson_data,
+        locations="neighbourhood",
+        featureidkey="properties.neighbourhood",
+        color=color,
+        color_continuous_scale=["lightblue", "yellow", "red"],
+        mapbox_style="carto-positron",
+        zoom=10,
+        center={"lat": 48.8566, "lon": 2.3522},
+        opacity=0.6,
+        title=title
+    )
+    st.plotly_chart(fig_heatmap, use_container_width=True)
+elif current_page == "page3":
+    st.title("Airbnb Paris Dashboard - Page 3")
+    st.markdown("### Parts de type de logement par arrondissement")
+
+    # Calcul des parts de type de logement par arrondissement
+    parts_par_arr = df.groupby(["neighbourhood", "room_type"]).size().reset_index(name='count')
+    total_par_arr = df.groupby("neighbourhood").size().reset_index(name='total')
+    parts_par_arr = parts_par_arr.merge(total_par_arr, on="neighbourhood")
+    parts_par_arr["part"] = parts_par_arr["count"] / parts_par_arr["total"]
+
+    # Création des small multiples
+    fig_small_multiples = px.bar(
+        parts_par_arr,
+        x="room_type",
+        y="part",
+        facet_col="neighbourhood",
+        facet_col_wrap=4,
+        title="Parts de type de logement par arrondissement",
+        labels={"room_type": "Type de logement", "part": "Part"},
+        height=800
+    )
+    fig_small_multiples.update_layout(showlegend=False)
+    st.plotly_chart(fig_small_multiples, use_container_width=True)
+elif current_page == "page4":
+    st.title("Airbnb Paris Dashboard - Page 4")
+    st.markdown("### Visualisation des Airbnb autour des monuments")
+
+    # Sélection du monument
+    monument_names = monuments['name'].tolist()
+    selected_monument = st.selectbox("Choisir un monument", options=monument_names)
+
+    # Sélection de la distance
+    distance = st.slider("Choisir la distance (m)", min_value=100, max_value=2000, value=200, step=100)
+
+   # Récupération des coordonnées du monument sélectionné
+    monument_coords = monuments[monuments['name'] == selected_monument][['latitude', 'longitude']].values[0]
+    mon_lat, mon_lon = monument_coords
+
+    # Approximation : 1° de latitude ≈ 111 km, la longitude dépend de la latitude
+    delta_lat = distance/100 / 111
+    delta_lon = distance/100 / (111 * abs(np.cos(np.radians(mon_lat))))
+
+    # Définition de la bounding box
+    lat_min, lat_max = mon_lat - delta_lat, mon_lat + delta_lat
+    lon_min, lon_max = mon_lon - delta_lon, mon_lon + delta_lon
+
+    # Filtrage rapide avant le calcul exact de distance
+    df_filtered = df[
+        (df['latitude'].between(lat_min, lat_max)) &
+        (df['longitude'].between(lon_min, lon_max))
+    ].copy()
+
+    # Calcul exact de la distance sur le sous-ensemble
+    df_filtered['distance'] = df_filtered.apply(
+        lambda row: geodesic((row['latitude'], row['longitude']), (mon_lat, mon_lon)).km, axis=1
+    )
+
+    # Filtrage final sur la distance
+    df_filtered = df_filtered[df_filtered['distance'] <= distance]
+
+    df_filtered["Lien Airbnb"] = df_filtered["id"].apply(lambda x: f'<a href="https://www.airbnb.fr/rooms/{x}" target="_blank">Voir l’annonce</a>')
+
+    # Affichage de la carte des Airbnb autour du monument
+    fig_map = px.scatter_mapbox(
+            df_filtered,
+            lat="latitude",
+            lon="longitude",
+            hover_name="name",
+            color="room_type",
+            zoom= 15 - (distance / 100),
+            height=600,
+            title=f"Airbnb autour de {selected_monument} dans un rayon de {distance} km",
+            custom_data=["Lien Airbnb"]
+        )
+    fig_map.update_layout(
+            mapbox_style="carto-positron",
+            margin={"r":0, "t":40, "l":0, "b":0}
+        )
+    for i, d in enumerate(fig_map.data):
+        d.hovertemplate += "<br>%{customdata[0]}"
+
+    st.plotly_chart(fig_map, use_container_width=True)
