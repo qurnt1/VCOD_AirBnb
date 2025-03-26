@@ -383,6 +383,56 @@ if current_page == "page1":
             margin=dict(t=40, b=40, l=0, r=0)  # Ajuste les marges pour éviter les bords blancs
         )
     st.plotly_chart(fig_reviews_type, use_container_width=True)
+    # Moyenne du prix par nombre de logements par arrondissement
+    # Calculer le prix moyen et le nombre d'appartements par arrondissement
+    df_price_by_neighborhood = df_filtered.groupby("neighbourhood")["price"].mean().reset_index()
+    df_apartments_by_neighborhood = df_filtered.groupby("neighbourhood")["id"].nunique().reset_index()
+    
+    # Fusionner les deux DataFrames pour avoir à la fois le prix moyen et le nombre d'appartements
+    df_neighborhoods = pd.merge(df_price_by_neighborhood, df_apartments_by_neighborhood, on="neighbourhood")
+    df_neighborhoods.columns = ['neighbourhood', 'avg_price', 'num_apartments']
+    
+    # Créer le graphique
+    fig_price_apartments = px.scatter(
+        df_neighborhoods, 
+        x="num_apartments", 
+        y="avg_price", 
+        color="neighbourhood", 
+        labels={"num_apartments": "Nombre d'appartements", "avg_price": "Prix moyen"},
+        title="Prix moyen en fonction du nombre d'appartements par arrondissement"
+    )
+    
+    # Ajouter un deuxième axe pour les appartements
+    fig_price_apartments.update_layout(
+        title=dict(
+            text="Prix moyen en fonction du nombre d'appartements par arrondissement",                
+            x=0.5,  # Centrer horizontalement
+            xanchor="center",  # Centrer sur l'axe X
+            font=dict(color="white")  # Titre en blanc
+        ),
+        legend=dict(
+            font=dict(color="white")
+        ),
+        plot_bgcolor="#0E1117",  # Fond du graphique en noir
+        paper_bgcolor="#0E1117",  # Fond général en noir (contours)
+        margin=dict(t=40, b=40, l=0, r=0),  # Ajuste les marges pour éviter les bords blancs
+        xaxis=dict(
+            title="Nombre d'appartements",
+            showgrid=True,
+            zeroline=False,
+            gridcolor="#444"
+        ),
+        yaxis=dict(
+            title="Prix moyen",
+            showgrid=True,
+            zeroline=False,
+            gridcolor="#444"
+        )
+    )
+    
+    # Affichage du graphique avec Streamlit
+    st.plotly_chart(fig_price_apartments, use_container_width=True)
+
 elif current_page == "page2":
     st.title("Airbnb Paris Dashboard - Page 2")
 
