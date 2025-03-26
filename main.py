@@ -16,23 +16,39 @@ st.set_option('client.showErrorDetails', False)
 # Style CSS personnalisé
 st.markdown(
     """
-        <style>
-        /* Mode sombre */
+    <style>
+        /* Mode sombre global */
         html, body, .stApp {
             background-color: #0E1117 !important;
             color: white !important;
         }
-
+    
         /* Conteneur principal */
         [data-testid="stAppViewContainer"], [data-testid="block-container"] {
             background-color: #0E1117 !important;
         }
-
-        /* Titres et texte */
-        h1, h2, h3, h4, h5, h6, p, label {
+    
+        /* Sidebar (barre latérale) */
+        [data-testid="stSidebar"], .css-1d391kg {
+            background-color: #0E1117 !important;
             color: white !important;
         }
-
+    
+        /* Titres et texte */
+        h1, h2, h3, h4, h5, h6, p, label, span {
+            color: white !important;
+        }
+    
+        /* Légende des graphiques */
+        .legendtext {
+            fill: white !important;
+        }
+    
+        /* Boutons de la sidebar */
+        [data-testid="stSidebarNav"] a {
+            color: white !important;
+        }
+    
         /* Barre de navigation */
         .nav-links {
             background-color: #0E1117; /* Couleur de fond de l'app */
@@ -46,15 +62,15 @@ st.markdown(
             font-weight: bold;
             color: white !important; /* Texte en blanc */
             background-color: #ff5d57; /* Fond rose */
-            padding: 10px 20px;  
+            padding: 10px 20px;
             border-radius: 5px;
             display: inline-block;
         }
         .nav-links a:hover {
             background-color: #e04b45;
         }
-
-        /* Boutons dans Streamlit */
+    
+        /* Boutons Streamlit */
         .st-emotion-cache-1oy2xl0 {
             background-color: #238636 !important;
             color: white !important;
@@ -62,7 +78,7 @@ st.markdown(
             padding: 10px 20px;
             border-radius: 5px;
         }
-
+    
         .st-emotion-cache-1oy2xl0:hover {
             background-color: #2EA043 !important;
         }
