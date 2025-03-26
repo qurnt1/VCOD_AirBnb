@@ -410,8 +410,6 @@ if current_page == "page1":
             )
         st.plotly_chart(fig_reviews_type, use_container_width=True)
 
-    col1, col2 = st.columns(2)
-
     # Graphique 2 : Box Plot - Distribution des prix par type de logement
     with col2:
         # Filtrer les prix supérieurs à 20 000 et les regrouper dans une catégorie unique
@@ -543,10 +541,6 @@ if current_page == "page1":
     
     # Affichage du graphique avec Streamlit
     st.plotly_chart(fig_combined, use_container_width=True)
-
-
-
-    
     
 
 elif current_page == "page2":
