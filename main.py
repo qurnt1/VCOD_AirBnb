@@ -20,7 +20,7 @@ st.markdown(
         /* Mode sombre */
         html, body {
             background-color: #0E1117;
-            color: white;
+            color: #0E1117;
         }
 
         /* Titres et texte */
