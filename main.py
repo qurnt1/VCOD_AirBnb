@@ -16,11 +16,16 @@ st.set_option('client.showErrorDetails', False)
 # Style CSS personnalisé
 st.markdown(
     """
-    <style>
+        <style>
         /* Mode sombre */
-        html, body {
-            background-color: #0E1117;
-            color: #0E1117;
+        html, body, .stApp {
+            background-color: #0E1117 !important;
+            color: white !important;
+        }
+
+        /* Conteneur principal */
+        [data-testid="stAppViewContainer"], [data-testid="block-container"] {
+            background-color: #0E1117 !important;
         }
 
         /* Titres et texte */
@@ -39,14 +44,14 @@ st.markdown(
             margin: 0 15px;
             text-decoration: none;
             font-weight: bold;
-            color: white; /* Texte en blanc */
+            color: white !important; /* Texte en blanc */
             background-color: #ff5d57; /* Fond rose */
-            padding: 10px 20px;  /* Amélioration de la visibilité des boutons */
+            padding: 10px 20px;  
             border-radius: 5px;
             display: inline-block;
         }
         .nav-links a:hover {
-            background-color: #e04b45; /* Rose un peu plus foncé au survol */
+            background-color: #e04b45;
         }
 
         /* Boutons dans Streamlit */
