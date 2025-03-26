@@ -492,9 +492,10 @@ if current_page == "page1":
         lambda x: x if x <= 20000 else 20000  # Regrouper tout ce qui est au-dessus de 20000 dans une seule catégorie
     )
     
-    # Créer des plages de prix
-    bins = [0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 100, 1100, 1200, 20000]
-    labels = ["0-100", "101-200", "201-300", "301-400", "401-500", "501-600", "601-700", "701-800", "801-900", "901-1000", "1001-1200", "1201-1500", "1501-20000"]
+    # Créer des plages de prix cohérentes
+    bins = [0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1200, 1500, 20000]
+    labels = ["0-100", "101-200", "201-300", "301-400", "401-500", "501-600", "601-700", "701-800", 
+              "801-900", "901-1000", "1001-1200", "1201-1500", "1501-20000"]
     
     # Ajouter une nouvelle colonne de plages de prix
     df_filtered['price_range'] = pd.cut(df_filtered['price_grouped'], bins=bins, labels=labels, right=False)
@@ -539,6 +540,7 @@ if current_page == "page1":
     
     # Affichage du graphique avec Streamlit
     st.plotly_chart(fig, use_container_width=True)
+    
 
 elif current_page == "page2":
     st.title("Airbnb Paris Dashboard - Page 2")
