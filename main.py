@@ -485,6 +485,61 @@ if current_page == "page1":
     # Affichage du graphique avec Streamlit
     st.plotly_chart(fig_combined, use_container_width=True)
 
+
+
+    # Filtrer les prix supérieurs à 20 000 et les regrouper dans une catégorie unique
+    df_filtered['price_grouped'] = df_filtered['price'].apply(
+        lambda x: x if x <= 20000 else 20000  # Regrouper tout ce qui est au-dessus de 20000 dans une seule catégorie
+    )
+    
+    # Créer des plages de prix
+    bins = [0, 50, 100, 150, 200, 300, 500, 1000, 5000, 10000, 20000]
+    labels = ["0-50", "51-100", "101-150", "151-200", "201-300", "301-500", "501-1000", "1001-5000", "5001-10000", "10001-20000"]
+    
+    # Ajouter une nouvelle colonne de plages de prix
+    df_filtered['price_range'] = pd.cut(df_filtered['price_grouped'], bins=bins, labels=labels, right=False)
+    
+    # Compter le nombre d'occurrences dans chaque plage de prix
+    price_counts = df_filtered['price_range'].value_counts().sort_index()
+    
+    # Créer l'histogramme
+    fig = go.Figure(data=[go.Bar(
+        x=price_counts.index,
+        y=price_counts.values,
+        marker=dict(color='rgb(100, 100, 255)'),
+    )])
+    
+    # Ajouter les configurations du graphique
+    fig.update_layout(
+        title="Distribution des prix par nuit",
+        xaxis=dict(
+            title="Plage de prix",
+            tickangle=45,
+            tickfont=dict(color="white"),
+            title_font=dict(color="white"),
+            showgrid=True,
+            zeroline=False,
+            gridcolor="#444"
+        ),
+        yaxis=dict(
+            title="Nombre d'appartements",
+            tickfont=dict(color="white"),
+            title_font=dict(color="white"),
+            showgrid=True,
+            zeroline=False,
+            gridcolor="#444"
+        ),
+        plot_bgcolor="#0E1117",  # Fond du graphique en noir
+        paper_bgcolor="#0E1117",  # Fond général en noir (contours)
+        legend=dict(
+            font=dict(color="white")
+        ),
+        margin=dict(t=40, b=80, l=40, r=40)  # Ajuste les marges
+    )
+    
+    # Affichage du graphique avec Streamlit
+    st.plotly_chart(fig, use_container_width=True)
+
 elif current_page == "page2":
     st.title("Airbnb Paris Dashboard - Page 2")
 
