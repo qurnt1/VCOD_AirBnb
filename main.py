@@ -29,10 +29,14 @@ st.markdown(
             background-color: #0E1117 !important;
         }
     
-        /* 🌑 Sidebar en noir */
+        /* 🌑 Sidebar et son icône */
         [data-testid="stSidebar"], .css-1d391kg {
             background-color: #0E1117 !important;
             color: white !important;
+        }
+        /* 🔼 Flèche d'ouverture/fermeture en blanc */
+        [data-testid="stSidebarNavIcon"] svg {
+            fill: white !important;
         }
     
         /* 🎨 Titres et texte */
@@ -52,6 +56,14 @@ st.markdown(
         }
         .stMultiSelect div[data-baseweb="select"] div {
             background-color: #1E222A !important;
+            color: white !important;
+        }
+    
+        /* 📊 Valeurs des 'metric()' en blanc */
+        div[data-testid="metric-container"] {
+            color: white !important;
+        }
+        div[data-testid="metric-container"] > label {
             color: white !important;
         }
     
@@ -93,6 +105,7 @@ st.markdown(
             background-color: #2EA043 !important;
         }
     </style>
+
     """, unsafe_allow_html=True
 )
 
@@ -406,24 +419,24 @@ if current_page == "page1":
     df_neighborhoods.columns = ['neighbourhood', 'avg_price', 'num_apartments']
     
     # Créer un graphique combiné avec deux axes Y
-    fig_combined = plotly.graph_objects.Figure()
+    fig_combined = go.Figure()
     
-    # Tracer le prix moyen
-    fig_combined.add_trace(plotly.graph_objects.Bar(
-        x=df_neighborhoods['neighbourhood'],
-        y=df_neighborhoods['avg_price'],
-        name="Prix moyen",
-        marker=dict(color='rgb(255, 100, 100)'),
-        yaxis="y1"
-    ))
-    
-    # Tracer le nombre d'appartements
-    fig_combined.add_trace(plotly.graph_objects.Scatter(
+    # Tracer le nombre d'appartements (en histogramme)
+    fig_combined.add_trace(go.Bar(
         x=df_neighborhoods['neighbourhood'],
         y=df_neighborhoods['num_apartments'],
         name="Nombre d'appartements",
-        mode='lines+markers',
         marker=dict(color='rgb(100, 100, 255)'),
+        yaxis="y1"
+    ))
+    
+    # Tracer le prix moyen (en ligne)
+    fig_combined.add_trace(go.Scatter(
+        x=df_neighborhoods['neighbourhood'],
+        y=df_neighborhoods['avg_price'],
+        name="Prix moyen",
+        mode='lines+markers',
+        marker=dict(color='rgb(255, 100, 100)'),
         yaxis="y2"
     ))
     
@@ -444,7 +457,7 @@ if current_page == "page1":
             title_font=dict(color="white")
         ),
         yaxis=dict(
-            title="Prix moyen",
+            title="Nombre d'appartements",
             showgrid=True,
             zeroline=False,
             gridcolor="#444",
@@ -452,7 +465,7 @@ if current_page == "page1":
             title_font=dict(color="white")
         ),
         yaxis2=dict(
-            title="Nombre d'appartements",
+            title="Prix moyen",
             showgrid=True,
             zeroline=False,
             gridcolor="#444",
