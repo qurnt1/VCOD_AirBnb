@@ -381,33 +381,92 @@ if current_page == "page1":
     
     st.markdown("---")
     
-    # Moyenne des avis par type de logement
-    fig_reviews_type = px.bar(
-        df_filtered.groupby("room_type")["number_of_reviews"].median().reset_index(), 
-        x="room_type", 
-        y="number_of_reviews", 
-        color="room_type",
-        labels={"room_type": "Type de logement", "number_of_reviews": "Nombre médian d'avis"},
-        title="Moyenne des avis par type de logement"
-    )
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        # Moyenne des avis par type de logement
+        fig_reviews_type = px.bar(
+            df_filtered.groupby("room_type")["number_of_reviews"].median().reset_index(), 
+            x="room_type", 
+            y="number_of_reviews", 
+            color="room_type",
+            labels={"room_type": "Type de logement", "number_of_reviews": "Nombre médian d'avis"},
+            title="Moyenne des avis par type de logement"
+        )
+    
+        fig_reviews_type.update_layout(
+                title=dict(
+                    text="Nombre médian d'avis par type de logement",                
+                    x=0.5,  # Centrer horizontalement
+                    xanchor="center",  # Centrer sur l'axe X
+                    font=dict(color="white")  # Titre en blanc
+                ),
+                legend=dict(
+                font=dict(color="white")
+                ),
+                plot_bgcolor="#0E1117",  # Fond du graphique en noir
+                paper_bgcolor="#0E1117",  # Fond général en noir (contours)
+                margin=dict(t=40, b=40, l=0, r=0)  # Ajuste les marges pour éviter les bords blancs
+            )
+        st.plotly_chart(fig_reviews_type, use_container_width=True)
 
-    fig_reviews_type.update_layout(
-            title=dict(
-                text="Nombre médian d'avis par type de logement",                
-                x=0.5,  # Centrer horizontalement
-                xanchor="center",  # Centrer sur l'axe X
-                font=dict(color="white")  # Titre en blanc
+    col1, col2 = st.columns(2)
+
+    # Graphique 2 : Box Plot - Distribution des prix par type de logement
+    with col2:
+        # Filtrer les prix supérieurs à 20 000 et les regrouper dans une catégorie unique
+        df_filtered['price_grouped'] = df_filtered['price'].apply(
+            lambda x: x if x <= 20000 else 20000  # Regrouper tout ce qui est au-dessus de 20000 dans une seule catégorie
+        )
+        
+        # Créer des plages de prix cohérentes
+        bins = [0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1200, 1500, 20000]
+        labels = ["0-100", "101-200", "201-300", "301-400", "401-500", "501-600", "601-700", "701-800", 
+                  "801-900", "901-1000", "1001-1200", "1201-1500", "1501-20000"]
+        
+        # Ajouter une nouvelle colonne de plages de prix
+        df_filtered['price_range'] = pd.cut(df_filtered['price_grouped'], bins=bins, labels=labels, right=False)
+        
+        # Compter le nombre d'occurrences dans chaque plage de prix
+        price_counts = df_filtered['price_range'].value_counts().sort_index()
+        
+        # Créer l'histogramme
+        fig = go.Figure(data=[go.Bar(
+            x=price_counts.index,
+            y=price_counts.values,
+            marker=dict(color='rgb(100, 100, 255)'),
+        )])
+        
+        # Ajouter les configurations du graphique
+        fig.update_layout(
+            title="Distribution des prix par nuit",
+            xaxis=dict(
+                title="Plage de prix",
+                tickangle=45,
+                tickfont=dict(color="white"),
+                title_font=dict(color="white"),
+                showgrid=True,
+                zeroline=False,
+                gridcolor="#444"
             ),
-            legend=dict(
-            font=dict(color="white")
+            yaxis=dict(
+                title="Nombre d'appartements",
+                tickfont=dict(color="white"),
+                title_font=dict(color="white"),
+                showgrid=True,
+                zeroline=False,
+                gridcolor="#444"
             ),
             plot_bgcolor="#0E1117",  # Fond du graphique en noir
             paper_bgcolor="#0E1117",  # Fond général en noir (contours)
-            margin=dict(t=40, b=40, l=0, r=0)  # Ajuste les marges pour éviter les bords blancs
+            legend=dict(
+                font=dict(color="white")
+            ),
+            margin=dict(t=40, b=80, l=40, r=40)  # Ajuste les marges
         )
-    st.plotly_chart(fig_reviews_type, use_container_width=True)
-
-
+        
+        # Affichage du graphique avec Streamlit
+        st.plotly_chart(fig, use_container_width=True)
     
     # Moyenne du prix par nombre de logements par arrondissement
     # Calculer le prix moyen et le nombre d'appartements par arrondissement
@@ -487,59 +546,7 @@ if current_page == "page1":
 
 
 
-    # Filtrer les prix supérieurs à 20 000 et les regrouper dans une catégorie unique
-    df_filtered['price_grouped'] = df_filtered['price'].apply(
-        lambda x: x if x <= 20000 else 20000  # Regrouper tout ce qui est au-dessus de 20000 dans une seule catégorie
-    )
     
-    # Créer des plages de prix cohérentes
-    bins = [0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1200, 1500, 20000]
-    labels = ["0-100", "101-200", "201-300", "301-400", "401-500", "501-600", "601-700", "701-800", 
-              "801-900", "901-1000", "1001-1200", "1201-1500", "1501-20000"]
-    
-    # Ajouter une nouvelle colonne de plages de prix
-    df_filtered['price_range'] = pd.cut(df_filtered['price_grouped'], bins=bins, labels=labels, right=False)
-    
-    # Compter le nombre d'occurrences dans chaque plage de prix
-    price_counts = df_filtered['price_range'].value_counts().sort_index()
-    
-    # Créer l'histogramme
-    fig = go.Figure(data=[go.Bar(
-        x=price_counts.index,
-        y=price_counts.values,
-        marker=dict(color='rgb(100, 100, 255)'),
-    )])
-    
-    # Ajouter les configurations du graphique
-    fig.update_layout(
-        title="Distribution des prix par nuit",
-        xaxis=dict(
-            title="Plage de prix",
-            tickangle=45,
-            tickfont=dict(color="white"),
-            title_font=dict(color="white"),
-            showgrid=True,
-            zeroline=False,
-            gridcolor="#444"
-        ),
-        yaxis=dict(
-            title="Nombre d'appartements",
-            tickfont=dict(color="white"),
-            title_font=dict(color="white"),
-            showgrid=True,
-            zeroline=False,
-            gridcolor="#444"
-        ),
-        plot_bgcolor="#0E1117",  # Fond du graphique en noir
-        paper_bgcolor="#0E1117",  # Fond général en noir (contours)
-        legend=dict(
-            font=dict(color="white")
-        ),
-        margin=dict(t=40, b=80, l=40, r=40)  # Ajuste les marges
-    )
-    
-    # Affichage du graphique avec Streamlit
-    st.plotly_chart(fig, use_container_width=True)
     
 
 elif current_page == "page2":
