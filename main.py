@@ -405,10 +405,10 @@ if current_page == "page1":
     df_neighborhoods.columns = ['neighbourhood', 'avg_price', 'num_apartments']
     
     # Créer un graphique combiné avec deux axes Y
-    fig_combined = go.Figure()
+    fig_combined = plotly.graph_objects.Figure()
     
     # Tracer le prix moyen
-    fig_combined.add_trace(go.Bar(
+    fig_combined.add_trace(plotly.graph_objects.Bar(
         x=df_neighborhoods['neighbourhood'],
         y=df_neighborhoods['avg_price'],
         name="Prix moyen",
@@ -417,7 +417,7 @@ if current_page == "page1":
     ))
     
     # Tracer le nombre d'appartements
-    fig_combined.add_trace(go.Scatter(
+    fig_combined.add_trace(plotly.graph_objects.Scatter(
         x=df_neighborhoods['neighbourhood'],
         y=df_neighborhoods['num_apartments'],
         name="Nombre d'appartements",
