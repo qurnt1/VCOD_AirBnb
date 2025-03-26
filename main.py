@@ -17,41 +17,51 @@ st.set_option('client.showErrorDetails', False)
 st.markdown(
     """
     <style>
-        /* Mode sombre global */
+        /* 🌑 Mode sombre global */
         html, body, .stApp {
             background-color: #0E1117 !important;
             color: white !important;
         }
     
-        /* Conteneur principal */
+        /* 🔲 Conteneur principal */
         [data-testid="stAppViewContainer"], [data-testid="block-container"] {
             background-color: #0E1117 !important;
         }
     
-        /* Sidebar (barre latérale) */
+        /* 🌑 Sidebar en noir */
         [data-testid="stSidebar"], .css-1d391kg {
             background-color: #0E1117 !important;
             color: white !important;
         }
     
-        /* Titres et texte */
+        /* 🎨 Titres et texte */
         h1, h2, h3, h4, h5, h6, p, label, span {
             color: white !important;
         }
     
-        /* Légende des graphiques */
+        /* 📌 Fix de la barre blanche en haut */
+        [data-testid="stHeader"], header {
+            background: #0E1117 !important;
+        }
+    
+        /* 📌 Multiselect & autres inputs */
+        .stMultiSelect div[data-baseweb="select"] {
+            background-color: #1E222A !important;
+            color: white !important;
+        }
+        .stMultiSelect div[data-baseweb="select"] div {
+            background-color: #1E222A !important;
+            color: white !important;
+        }
+    
+        /* 🎨 Légende des graphiques */
         .legendtext {
             fill: white !important;
         }
     
-        /* Boutons de la sidebar */
-        [data-testid="stSidebarNav"] a {
-            color: white !important;
-        }
-    
-        /* Barre de navigation */
+        /* 🏠 Barre de navigation */
         .nav-links {
-            background-color: #0E1117; /* Couleur de fond de l'app */
+            background-color: #0E1117;
             padding: 10px;
             text-align: center;
             margin-bottom: 20px;
@@ -60,8 +70,8 @@ st.markdown(
             margin: 0 15px;
             text-decoration: none;
             font-weight: bold;
-            color: white !important; /* Texte en blanc */
-            background-color: #ff5d57; /* Fond rose */
+            color: white !important;
+            background-color: #ff5d57;
             padding: 10px 20px;
             border-radius: 5px;
             display: inline-block;
@@ -70,7 +80,7 @@ st.markdown(
             background-color: #e04b45;
         }
     
-        /* Boutons Streamlit */
+        /* 🔘 Boutons Streamlit */
         .st-emotion-cache-1oy2xl0 {
             background-color: #238636 !important;
             color: white !important;
@@ -78,7 +88,6 @@ st.markdown(
             padding: 10px 20px;
             border-radius: 5px;
         }
-    
         .st-emotion-cache-1oy2xl0:hover {
             background-color: #2EA043 !important;
         }
@@ -383,6 +392,9 @@ if current_page == "page1":
             margin=dict(t=40, b=40, l=0, r=0)  # Ajuste les marges pour éviter les bords blancs
         )
     st.plotly_chart(fig_reviews_type, use_container_width=True)
+
+
+    
     # Moyenne du prix par nombre de logements par arrondissement
     # Calculer le prix moyen et le nombre d'appartements par arrondissement
     df_price_by_neighborhood = df_filtered.groupby("neighbourhood")["price"].mean().reset_index()
@@ -392,46 +404,72 @@ if current_page == "page1":
     df_neighborhoods = pd.merge(df_price_by_neighborhood, df_apartments_by_neighborhood, on="neighbourhood")
     df_neighborhoods.columns = ['neighbourhood', 'avg_price', 'num_apartments']
     
-    # Créer le graphique
-    fig_price_apartments = px.scatter(
-        df_neighborhoods, 
-        x="num_apartments", 
-        y="avg_price", 
-        color="neighbourhood", 
-        labels={"num_apartments": "Nombre d'appartements", "avg_price": "Prix moyen"},
-        title="Prix moyen en fonction du nombre d'appartements par arrondissement"
-    )
+    # Créer un graphique combiné avec deux axes Y
+    fig_combined = go.Figure()
     
-    # Ajouter un deuxième axe pour les appartements
-    fig_price_apartments.update_layout(
-        title=dict(
-            text="Prix moyen en fonction du nombre d'appartements par arrondissement",                
-            x=0.5,  # Centrer horizontalement
-            xanchor="center",  # Centrer sur l'axe X
-            font=dict(color="white")  # Titre en blanc
-        ),
-        legend=dict(
-            font=dict(color="white")
-        ),
-        plot_bgcolor="#0E1117",  # Fond du graphique en noir
-        paper_bgcolor="#0E1117",  # Fond général en noir (contours)
-        margin=dict(t=40, b=40, l=0, r=0),  # Ajuste les marges pour éviter les bords blancs
+    # Tracer le prix moyen
+    fig_combined.add_trace(go.Bar(
+        x=df_neighborhoods['neighbourhood'],
+        y=df_neighborhoods['avg_price'],
+        name="Prix moyen",
+        marker=dict(color='rgb(255, 100, 100)'),
+        yaxis="y1"
+    ))
+    
+    # Tracer le nombre d'appartements
+    fig_combined.add_trace(go.Scatter(
+        x=df_neighborhoods['neighbourhood'],
+        y=df_neighborhoods['num_apartments'],
+        name="Nombre d'appartements",
+        mode='lines+markers',
+        marker=dict(color='rgb(100, 100, 255)'),
+        yaxis="y2"
+    ))
+    
+    # Ajouter les configurations des axes
+    fig_combined.update_layout(
+        title="Prix moyen et Nombre d'appartements par arrondissement",
+        title_x=0.5,
         xaxis=dict(
-            title="Nombre d'appartements",
+            title="Arrondissements",
+            tickangle=45,
+            tickmode="array",
+            tickvals=df_neighborhoods['neighbourhood'],
+            ticktext=df_neighborhoods['neighbourhood'],
             showgrid=True,
             zeroline=False,
-            gridcolor="#444"
+            gridcolor="#444",
+            tickfont=dict(color="white"),
+            title_font=dict(color="white")
         ),
         yaxis=dict(
             title="Prix moyen",
             showgrid=True,
             zeroline=False,
-            gridcolor="#444"
-        )
+            gridcolor="#444",
+            tickfont=dict(color="white"),
+            title_font=dict(color="white")
+        ),
+        yaxis2=dict(
+            title="Nombre d'appartements",
+            showgrid=True,
+            zeroline=False,
+            gridcolor="#444",
+            tickfont=dict(color="white"),
+            title_font=dict(color="white"),
+            overlaying="y",
+            side="right"
+        ),
+        plot_bgcolor="#0E1117",  # Fond du graphique en noir
+        paper_bgcolor="#0E1117",  # Fond général en noir (contours)
+        legend=dict(
+            font=dict(color="white")
+        ),
+        margin=dict(t=40, b=80, l=40, r=40)  # Ajuste les marges
     )
     
     # Affichage du graphique avec Streamlit
-    st.plotly_chart(fig_price_apartments, use_container_width=True)
+    st.plotly_chart(fig_combined, use_container_width=True)
 
 elif current_page == "page2":
     st.title("Airbnb Paris Dashboard - Page 2")
