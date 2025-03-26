@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-import plotly.graph_objects
+import plotly.graph_objects as go
 import json
 import warnings
 from geopy.distance import geodesic
