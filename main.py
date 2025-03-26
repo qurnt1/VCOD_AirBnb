@@ -345,7 +345,7 @@ if current_page == "page1":
             margin=dict(t=40, b=40, l=0, r=0)  # Ajuste les marges pour éviter les bords blancs
         )
 
-        st.plotly_chart(fig_room, use_container_width=True)
+    st.plotly_chart(fig_room, use_container_width=True)
         
     st.markdown("---")
     # ----------------------------------------------------------------------------
@@ -464,7 +464,7 @@ if current_page == "page1":
         )
         
             # Affichage du graphique avec Streamlit
-            st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True)
     
     # Moyenne du prix par nombre de logements par arrondissement
     # Calculer le prix moyen et le nombre d'appartements par arrondissement
