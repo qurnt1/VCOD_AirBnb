@@ -261,7 +261,7 @@ if current_page == "page1":
         st.download_button(
             label="Télécharger les données filtrées",
             data=csv_data,
-            file_name="airbnb_paris_filtered.csv",
+            file_name=f"csv_donnees_filtrees_{'_'.join(filters['selected_room_types'])}_{str(filters['price_range']).replace(' ', '')}_{str(filters['reviews_range']).replace(' ', '')}_{'_'.join(filters['selected_arrondissements'])}.csv",
             mime="text/csv"
         )
 
