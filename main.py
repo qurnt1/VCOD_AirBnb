@@ -15,7 +15,6 @@ st.set_option('client.showErrorDetails', False)
 
 
 
-# Style CSS personnalisé
 st.markdown(
     """
     <style>
@@ -58,10 +57,10 @@ st.markdown(
     
         /* 📊 Valeurs des 'metric()' en blanc */
         div[data-testid="metric-container"] {
-            color: white !important;
+            color: white !important; /* Texte des metrics en blanc */
         }
         div[data-testid="metric-container"] > label {
-            color: white !important;
+            color: white !important; /* Assurer que le label des metrics est aussi en blanc */
         }
     
         /* 🎨 Légende des graphiques */
@@ -106,7 +105,6 @@ st.markdown(
     </style>
     """, unsafe_allow_html=True
 )
-
 
 # Détecter le paramètre de l'URL pour déterminer la page active
 query_params = st.experimental_get_query_params()
