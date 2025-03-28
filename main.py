@@ -508,8 +508,12 @@ if current_page == "page1":
     
     # Ajouter la configuration de la légende à droite et centrée
     fig_combined.update_layout(
-        title="Prix moyen et Nombre d'appartements par arrondissement",
-        title_x=0.5,
+        title=dict(
+                    text="Prix moyen et Nombre d'appartements par arrondissement",                
+                    x=0.5,  # Centrer horizontalement
+                    xanchor="center",  # Centrer sur l'axe X
+                    font=dict(color="white")  # Titre en blanc
+        ),
         xaxis=dict(
             title="Arrondissements",
             tickangle=45,
