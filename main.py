@@ -6,8 +6,8 @@ import json
 import warnings
 from geopy.distance import geodesic
 import numpy as np
-import warnings
-import io
+import warnings #pour desactiver les warnings
+import io #pour telecharger le fichier csv
 
 st.set_page_config(page_title="Airbnb Paris Dashboard", layout="wide")
 
