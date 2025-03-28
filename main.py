@@ -458,7 +458,9 @@ if current_page == "page1":
             plot_bgcolor="#0E1117",  # Fond du graphique en noir
             paper_bgcolor="#0E1117",  # Fond général en noir (contours)
             legend=dict(
-                font=dict(color="white")
+                font=dict(color="white"),
+                xanchor="center"  # Aligne la légende par rapport au centre
+
             ),
             margin=dict(t=40, b=80, l=40, r=40)  # Ajuste les marges
         )
@@ -534,7 +536,9 @@ if current_page == "page1":
         plot_bgcolor="#0E1117",  # Fond du graphique en noir
         paper_bgcolor="#0E1117",  # Fond général en noir (contours)
         legend=dict(
-            font=dict(color="white")
+            font=dict(color="white"),
+            xanchor="center"  # Aligne la légende par rapport au centre
+
         ),
         margin=dict(t=40, b=80, l=40, r=40)  # Ajuste les marges
     )
