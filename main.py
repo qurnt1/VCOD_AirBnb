@@ -500,6 +500,7 @@ if current_page == "page1":
     ))
     
     # Ajouter les configurations des axes
+    
     fig_combined.update_layout(
         title="Prix moyen et Nombre d'appartements par arrondissement",
         title_x=0.5,
@@ -537,14 +538,13 @@ if current_page == "page1":
         paper_bgcolor="#0E1117",  # Fond général en noir (contours)
         legend=dict(
             font=dict(color="white"),
-            xanchor="center"  # Aligne la légende par rapport au centre
-
+            x=0.5,  # Centrer horizontalement
+            xanchor="center",  # Centrer par rapport à l'axe X
+            y=1.15,  # Positionner la légende un peu au-dessus du graphique pour éviter le chevauchement
+            yanchor="bottom"  # L'ancrage doit être en bas pour ne pas recouvrir le graphique
         ),
         margin=dict(t=40, b=80, l=40, r=40)  # Ajuste les marges
     )
-    
-    # Affichage du graphique avec Streamlit
-    st.plotly_chart(fig_combined, use_container_width=True)
     
 
 elif current_page == "page2":
