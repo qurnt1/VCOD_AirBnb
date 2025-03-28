@@ -7,6 +7,7 @@ import warnings
 from geopy.distance import geodesic
 import numpy as np
 import warnings
+import io
 
 st.set_page_config(page_title="Airbnb Paris Dashboard", layout="wide")
 
@@ -175,6 +176,11 @@ def load_monuments():
     return monuments
 
 monuments = load_monuments()
+# ------------------------------------------------------------------------------
+# Fonction pour télécharger les données filtrées sous forme de csv
+# ------------------------------------------------------------------------------
+def convert_df_to_csv(df):
+    return df.to_csv(index=False).encode('utf-8')
 
 # Contenu des pages
 if current_page == "page1":
@@ -246,9 +252,18 @@ if current_page == "page1":
         taux_reponse_moyen = df_filtered["calculated_host_listings_count"].mean()
         col6.metric("Taux de réponse moyen (en %)", f"{taux_reponse_moyen:.1f}" if not df_filtered["calculated_host_listings_count"].isna().all() else "N/A")
 
-    col7, _ , _ = st.columns(3)
+    col7, col8 , _ = st.columns(3)
     percent_entire_home = (df_filtered["room_type"] == 'Appartement entier').sum() / df_filtered.shape[0] * 100
     col7.metric("Logements entiers (%)", f"{percent_entire_home:.1f}%")
+    with col8:
+    # Bouton de téléchargement des données filtrées
+    csv_data = convert_df_to_csv(df_filtered)
+    st.download_button(
+        label="Télécharger les données filtrées",
+        data=csv_data,
+        file_name="airbnb_paris_filtered.csv",
+        mime="text/csv"
+    )
 
     st.markdown("---")
 
