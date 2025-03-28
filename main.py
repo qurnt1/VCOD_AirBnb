@@ -277,27 +277,27 @@ if current_page == "page1":
             labels={"room_type": "Type de logement"}
         )
     
-        fig_map.update_layout(
-            title=dict(
-                text="Localisation des logements à Paris",
-                x=0.5,  # Centrer horizontalement
-                xanchor="center",  # Centrer sur l'axe X
-                font=dict(color="white")  # Titre en blanc
-            ),
-            legend=dict(
-                font=dict(color="white")  # Légende en blanc
-            ),
-            mapbox=dict(
-                style="satellite-streets",  # Utilisation du style satellite de Mapbox
-                center={"lat": df_filtered["latitude"].mean(), "lon": df_filtered["longitude"].mean()},
-                zoom=11
-            ),
-            plot_bgcolor="#0E1117",  # Fond du graphique en noir
-            paper_bgcolor="#0E1117",  # Fond général en noir (contours)
-            margin=dict(t=40, b=40, l=0, r=0)  # Ajuste les marges pour éviter les bords blancs
-        )
+    fig_map.update_layout(
+        title=dict(
+            text="Localisation des logements à Paris",
+            x=0.5,  # Centrer horizontalement
+            xanchor="center",  # Centrer sur l'axe X
+            font=dict(color="white")  # Titre en blanc
+        ),
+        legend=dict(
+            font=dict(color="white")  # Légende en blanc
+        ),
+        mapbox=dict(
+            style="satellite-streets",  # Utilisation du style satellite de Mapbox
+            center={"lat": df_filtered["latitude"].mean(), "lon": df_filtered["longitude"].mean()},
+            zoom=11
+        ),
+        plot_bgcolor="#0E1117",  # Fond du graphique en noir
+        paper_bgcolor="#0E1117",  # Fond général en noir (contours)
+        margin=dict(t=40, b=40, l=0, r=0)  # Ajuste les marges pour éviter les bords blancs
+    )
     
-        st.plotly_chart(fig_map, use_container_width=True)
+    st.plotly_chart(fig_map, use_container_width=True)
     
     st.markdown("---")
     
