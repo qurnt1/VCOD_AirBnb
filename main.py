@@ -259,7 +259,7 @@ if current_page == "page1":
         # Bouton de téléchargement des données filtrées
         csv_data = convert_df_to_csv(df_filtered)
         st.download_button(
-            label="Télécharger les données filtrées",
+            label=f"Télécharger les données {df_filtered.shape[0]} filtrées",
             data=csv_data,
             file_name = f"csv_donnees_filtrees_{'_'.join(filters['selected_room_types'])}_price_range_{str(filters['price_range']).replace(' ', '')}_reviews_range_{str(filters['reviews_range']).replace(' ', '')}.csv",
             mime="text/csv"
