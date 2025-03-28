@@ -550,8 +550,18 @@ elif current_page == "page2":
     prix_moyen_par_arr = df.groupby("neighbourhood")["price"].mean().reset_index()
     nombre_logements_par_arr = df["neighbourhood"].value_counts().reset_index()
     nombre_logements_par_arr.columns = ["neighbourhood", "count"]
-    part_logements_entiers_par_arr = df[df["room_type"] == "Entire home/apt"].groupby("neighbourhood").size().reset_index(name='count')
-    part_logements_entiers_par_arr["part"] = part_logements_entiers_par_arr["count"] / nombre_logements_par_arr["count"]
+    # Remplacez "Entire home/apt" par "Appartement entier"
+    part_logements_entiers_par_arr = df[df["room_type"] == "Appartement entier"].groupby("neighbourhood").size().reset_index(name='count')
+    # Jointure pour inclure tous les quartiers, remplissage des NaN par 0
+    part_logements_entiers_par_arr = nombre_logements_par_arr.merge(
+        part_logements_entiers_par_arr, on="neighbourhood", how="left"
+    ).fillna(0)
+
+    # Calcul de la part
+    part_logements_entiers_par_arr["part"] = part_logements_entiers_par_arr["count_y"] / part_logements_entiers_par_arr["count_x"]
+
+    # Renommage des colonnes
+    part_logements_entiers_par_arr = part_logements_entiers_par_arr.rename(columns={"count_x": "total_logements", "count_y": "logements_entiers"})
 
     # Sélection de la variable à afficher
     variable = st.selectbox("Choisir la variable à afficher sur la carte", 
@@ -600,11 +610,12 @@ elif current_page == "page3":
         parts_par_arr,
         x="room_type",
         y="part",
+        barmode="stack",
         facet_col="neighbourhood",
         facet_col_wrap=4,
         title="Parts de type de logement par arrondissement",
         labels={"room_type": "Type de logement", "part": "Part"},
-        height=800
+        height=1000
     )
     fig_small_multiples.update_layout(showlegend=False)
     st.plotly_chart(fig_small_multiples, use_container_width=True)
@@ -624,8 +635,8 @@ elif current_page == "page4":
     mon_lat, mon_lon = monument_coords
 
     # Approximation : 1° de latitude ≈ 111 km, la longitude dépend de la latitude
-    delta_lat = distance/100 / 111
-    delta_lon = distance/100 / (111 * abs(np.cos(np.radians(mon_lat))))
+    delta_lat = distance/1000 / 111
+    delta_lon = distance/1000 / (111 * abs(np.cos(np.radians(mon_lat))))
 
     # Définition de la bounding box
     lat_min, lat_max = mon_lat - delta_lat, mon_lat + delta_lat
@@ -654,16 +665,77 @@ elif current_page == "page4":
             lon="longitude",
             hover_name="name",
             color="room_type",
-            zoom= 15 - (distance / 100),
+            zoom= 15 - (distance / 1000),
             height=600,
-            title=f"Airbnb autour de {selected_monument} dans un rayon de {distance} km",
+            #title=f"Airbnb autour de {selected_monument} dans un rayon de {distance} m",
             custom_data=["Lien Airbnb"]
         )
     fig_map.update_layout(
+            plot_bgcolor="#0E1117",
+            paper_bgcolor="#0E1117",
+            title=dict(
+                text=f"Airbnb autour de {selected_monument} dans un rayon de {distance} m",
+                x=0.5,  # Centrer horizontalement
+                xanchor="center",  # Centrer sur l'axe X
+                font=dict(color="white")  # Titre en blanc
+            ),
             mapbox_style="carto-positron",
-            margin={"r":0, "t":40, "l":0, "b":0}
-        )
+            margin={"r":0, "t":40, "l":0, "b":0},
+            legend=dict(
+            title="Type de logement",  # Titre de la légende
+            title_font=dict(color="white"),  # Couleur du titre de la légende
+            font=dict(color="white"),  # Couleur du texte de la légende
+            bgcolor="#0E1117",         # Couleur de fond de la légende
+            bordercolor="white",       # Couleur de la bordure
+            borderwidth=1              # Épaisseur de la bordure
+            )
+            
+            )
     for i, d in enumerate(fig_map.data):
         d.hovertemplate += "<br>%{customdata[0]}"
 
     st.plotly_chart(fig_map, use_container_width=True)
+    # Initialisation d'une variable de session pour suivre le nombre de liens affichés
+    if "num_links" not in st.session_state:
+        st.session_state.num_links = 5  # Afficher 5 liens au départ
+
+    # Affichage des annonces Airbnb sous forme de conteneurs
+    st.markdown("### Aperçu des annonces Airbnb")
+    for i, row in df_filtered.head(st.session_state.num_links).iterrows():
+        st.markdown(
+            f"""
+            <div style="background-color: #1E222A; padding: 10px; margin-bottom: 20px; border-radius: 5px;">
+                <h4 style="color: #FF5D57; margin: 0;">{row['name']}</h4>
+                <p style="color: white; margin: 5px 0;">Type: {row['room_type']} | Prix: {row['price']}€</p>
+                <a href="https://www.airbnb.fr/rooms/{row['id']}" target="_blank" style="color: white; text-decoration: none; background-color: #ff5d57; padding: 10px 20px; border-radius: 5px; display: inline-block; font-weight: bold;">
+                    Voir l'annonce
+                </a>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+    # Ajout de styles CSS personnalisés pour le bouton
+    st.markdown(
+        """
+        <style>
+        .stButton > button {
+            background-color: #FF5D57; /* Couleur de fond */
+            color: white; /* Couleur du texte */
+            font-weight: bold;
+            padding: 10px 20px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+        }
+        .stButton > button:hover {
+            background-color: #E04B45; /* Couleur au survol */
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
+    # Bouton natif Streamlit pour afficher 5 annonces supplémentaires
+    if st.button("Voir plus"):
+        st.session_state.num_links += 5  # Augmenter le nombre d'annonces affichées de 5    
