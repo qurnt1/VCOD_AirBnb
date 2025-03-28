@@ -438,6 +438,7 @@ if current_page == "page1":
         # Ajouter les configurations du graphique
         fig.update_layout(
             title="Distribution des prix par nuit",
+            title_x=0.5, 
             xaxis=dict(
                 title="Plage de prix",
                 tickangle=45,
@@ -448,7 +449,7 @@ if current_page == "page1":
                 gridcolor="#444"
             ),
             yaxis=dict(
-                title="Nombre d'appartements",
+                title="Nombre de logemenst",
                 tickfont=dict(color="white"),
                 title_font=dict(color="white"),
                 showgrid=True,
