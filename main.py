@@ -277,7 +277,7 @@ if current_page == "page1":
             font=dict(color="white")  # Légende en blanc
         ),
         mapbox=dict(
-            style="satellite",  # Utilisation du style satellite de Mapbox
+            style="satellite-streets",  # Utilisation du style satellite de Mapbox
             center={"lat": df_filtered["latitude"].mean(), "lon": df_filtered["longitude"].mean()},
             zoom=11
         ),
