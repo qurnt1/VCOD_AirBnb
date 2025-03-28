@@ -545,7 +545,8 @@ if current_page == "page1":
         ),
         margin=dict(t=40, b=80, l=40, r=40)  # Ajuste les marges
     )
-    
+    st.plotly_chart(fig_combined, use_container_width=True)
+
 
 elif current_page == "page2":
     st.title("Airbnb Paris Dashboard - Page 2")
