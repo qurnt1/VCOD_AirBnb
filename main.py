@@ -156,7 +156,7 @@ geojson_data = load_geojson()
 # ------------------------------------------------------------------------------
 @st.cache_data
 def load_monuments():
-    url = "datas/data/monuments.csv"
+    url = "https://static.data.gouv.fr/resources/liste-des-coordonnees-gps-des-monuments-nationaux/20190729-144937/liste-coordonnees-gps-des-monuments.csv"
     monuments = pd.read_csv(url, delimiter=',', encoding='latin1')
     
     # Limites géographiques de Paris
