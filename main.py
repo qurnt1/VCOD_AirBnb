@@ -437,8 +437,12 @@ if current_page == "page1":
         
         # Ajouter les configurations du graphique
         fig.update_layout(
-            title="Distribution des prix par nuit",
-            title_x=0.5, 
+            title=dict(
+                    text="Distribution des prix par nuit",                
+                    x=0.5,  # Centrer horizontalement
+                    xanchor="center",  # Centrer sur l'axe X
+                    font=dict(color="white")  # Titre en blanc
+                ),
             xaxis=dict(
                 title="Plage de prix",
                 tickangle=45,
