@@ -35,10 +35,6 @@ st.markdown(
             background-color: #0E1117 !important;
             color: white !important;
         }
-        /* 🔼 Flèche d'ouverture/fermeture en blanc */
-        [data-testid="stSidebarNavIcon"] svg {
-            fill: white !important;
-        }
     
         /* 🎨 Titres et texte */
         h1, h2, h3, h4, h5, h6, p, label, span {
@@ -72,7 +68,7 @@ st.markdown(
         .legendtext {
             fill: white !important;
         }
-    
+
         /* 🏠 Barre de navigation */
         .nav-links {
             background-color: #0E1117;
@@ -93,22 +89,24 @@ st.markdown(
         .nav-links a:hover {
             background-color: #e04b45;
         }
-    
-        /* 🔘 Boutons Streamlit */
-        .st-emotion-cache-1oy2xl0 {
-            background-color: #238636 !important;
-            color: white !important;
+
+        /* 🎨 Personnalisation du bouton de téléchargement */
+        .stDownloadButton button {
+            background-color: #0E1117 !important;
+            color: #ff5d57 !important;
             font-weight: bold;
             padding: 10px 20px;
             border-radius: 5px;
         }
-        .st-emotion-cache-1oy2xl0:hover {
-            background-color: #2EA043 !important;
+        .stDownloadButton button:hover {
+            background-color: #ff5d57 !important;
+            color: white !important;
         }
+    
     </style>
-
     """, unsafe_allow_html=True
 )
+
 
 # Détecter le paramètre de l'URL pour déterminer la page active
 query_params = st.experimental_get_query_params()
