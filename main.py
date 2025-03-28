@@ -264,48 +264,40 @@ if current_page == "page1":
     st.markdown("---")
 
     # Graphique 1 : Carte interactive des logements à Paris
-   # On suppose que df_filtered contient les colonnes 'latitude', 'longitude', 'room_type', 'price', 'name' et 'Lien Airbnb'
     fig_map = px.scatter_map(
-        df_filtered,
-        lat="latitude",
-        lon="longitude",
-        hover_name="name",
-        hover_data=["price", "room_type", "Lien Airbnb"],  # Ajouter "Lien Airbnb" pour que ce champ soit disponible dans hover_data
-        color="room_type",
-        zoom=11,
-        height=600,
-        title="Localisation des logements à Paris",
-        labels={"room_type": "Type de logement"}
-    )
+            df_filtered,
+            lat="latitude",
+            lon="longitude",
+            hover_name="name",
+            hover_data=["price", "room_type"],
+            color="room_type",
+            zoom=11,
+            height=600,
+            title="Localisation des logements à Paris",
+            labels={"room_type": "Type de logement"}
+        )
     
-    # Mise à jour du layout
-    fig_map.update_layout(
-        title=dict(
-            text="Localisation des logements à Paris",
-            x=0.5,  # Centrer horizontalement
-            xanchor="center",  # Centrer sur l'axe X
-            font=dict(color="white")  # Titre en blanc
-        ),
-        legend=dict(
-            font=dict(color="white")  # Légende en blanc
-        ),
-        mapbox=dict(
-            style="satellite-streets",  # Utilisation du style satellite de Mapbox
-            center={"lat": df_filtered["latitude"].mean(), "lon": df_filtered["longitude"].mean()},
-            zoom=11
-        ),
-        plot_bgcolor="#0E1117",  # Fond du graphique en noir
-        paper_bgcolor="#0E1117",  # Fond général en noir (contours)
-        margin=dict(t=40, b=40, l=0, r=0)  # Ajuste les marges pour éviter les bords blancs
-    )
+        fig_map.update_layout(
+            title=dict(
+                text="Localisation des logements à Paris",
+                x=0.5,  # Centrer horizontalement
+                xanchor="center",  # Centrer sur l'axe X
+                font=dict(color="white")  # Titre en blanc
+            ),
+            legend=dict(
+                font=dict(color="white")  # Légende en blanc
+            ),
+            mapbox=dict(
+                style="satellite-streets",  # Utilisation du style satellite de Mapbox
+                center={"lat": df_filtered["latitude"].mean(), "lon": df_filtered["longitude"].mean()},
+                zoom=11
+            ),
+            plot_bgcolor="#0E1117",  # Fond du graphique en noir
+            paper_bgcolor="#0E1117",  # Fond général en noir (contours)
+            margin=dict(t=40, b=40, l=0, r=0)  # Ajuste les marges pour éviter les bords blancs
+        )
     
-    # Mise à jour de hovertemplate pour afficher le lien de l'annonce
-    for i, d in enumerate(fig_map.data):
-        # Ajouter le lien sous forme de texte cliquable
-        d.hovertemplate += "<br><b>Lien vers l'annonce:</b> <a href='%{customdata[2]}' target='_blank' style='color: #ff5d57;'>Cliquez ici</a>"
-    
-    # Affichage de la carte dans Streamlit
-    st.plotly_chart(fig_map, use_container_width=True)
+        st.plotly_chart(fig_map, use_container_width=True)
     
     st.markdown("---")
     
