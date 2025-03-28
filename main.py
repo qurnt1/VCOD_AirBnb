@@ -3,11 +3,8 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import json
-import warnings
 from geopy.distance import geodesic
 import numpy as np
-import warnings #pour desactiver les warnings
-import io #pour telecharger le fichier csv
 
 st.set_page_config(page_title="Airbnb Paris Dashboard", layout="wide")
 
@@ -130,7 +127,7 @@ st.markdown("""
 # ------------------------------------------------------------------------------
 @st.cache_data
 def load_data():
-    df = pd.read_csv("listings.csv")
+    df = pd.read_csv("datas/data/listings.csv")
     if 'last_review' in df.columns:
         df['last_review'] = pd.to_datetime(df['last_review'], errors='coerce')
     df['room_type'] = df['room_type'].replace({
@@ -148,7 +145,7 @@ df = load_data()
 # ------------------------------------------------------------------------------
 @st.cache_data
 def load_geojson():
-    with open("neighbourhoods.geojson", "r", encoding="utf-8") as f:
+    with open("datas/data/neighbourhoods.geojson", "r", encoding="utf-8") as f:
         geojson_data = json.load(f)
     return geojson_data
 
@@ -159,7 +156,7 @@ geojson_data = load_geojson()
 # ------------------------------------------------------------------------------
 @st.cache_data
 def load_monuments():
-    url = "monuments.csv"
+    url = "datas/data/monuments.csv"
     monuments = pd.read_csv(url, delimiter=',', encoding='latin1')
     
     # Limites géographiques de Paris
@@ -177,7 +174,7 @@ monuments = load_monuments()
 if current_page == "page1":
 
     # Affichage du logo et du titre
-    st.image("logo.png", width=150)  
+    st.image("datas/imgs/logo.png", width=150)  
     st.title("Airbnb Paris Dashboard")
     st.markdown("### Analyse interactive des données Airbnb à Paris")
     
