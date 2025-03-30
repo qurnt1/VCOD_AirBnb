@@ -627,12 +627,18 @@ elif current_page == "page3":
     st.title("Airbnb Paris Dashboard - Page 3")
     st.markdown("### Parts de type de logement par arrondissement")
 
+    # Filtre global en haut pour sélectionner les types de logement
+    room_types = df['room_type'].dropna().unique().tolist()
+    selected_room_types = st.multiselect("Sélectionnez les types de logement à afficher", options=room_types, default=room_types)
+
+    df_filtered = df[df['room_type'].isin(selected_room_types)]
     # Calcul des parts de type de logement par arrondissement
-    parts_par_arr = df.groupby(["neighbourhood", "room_type"]).size().reset_index(name='count')
-    total_par_arr = df.groupby("neighbourhood").size().reset_index(name='total')
+    parts_par_arr = df_filtered.groupby(["neighbourhood", "room_type"]).size().reset_index(name='count')
+    total_par_arr = df_filtered.groupby("neighbourhood").size().reset_index(name='total')
     parts_par_arr = parts_par_arr.merge(total_par_arr, on="neighbourhood")
     parts_par_arr["part"] = parts_par_arr["count"] / parts_par_arr["total"]
 
+    
     # Création des small multiples
     fig_small_multiples = px.bar(
         parts_par_arr,
@@ -642,11 +648,25 @@ elif current_page == "page3":
         facet_col="neighbourhood",
         facet_col_wrap=4,
         title="Parts de type de logement par arrondissement",
-        labels={"room_type": "Type de logement", "part": "Part"},
-        height=1000
+        labels={"room_type": "Type de logement", "part": "Répartition","neighbourhood": "Arrondissement" },
+        height=1000,
+        text_auto=".0%",
+
     )
-    fig_small_multiples.update_layout(showlegend=False)
+
+    fig_small_multiples.update_traces(marker_color="#f94941") 
+    fig_small_multiples.for_each_annotation(lambda a: a.update(text=a.text.split('=')[-1].strip()))
+
+    fig_small_multiples.update_layout(  
+        showlegend=False,
+        margin=dict(t=50, l=50, r=50, b=50),  # Ajustement des marges
+    )
+    fig_small_multiples.for_each_yaxis(
+        lambda yaxis: yaxis.update(tickformat=".0%", side="left", range=[0, 1])
+    )
+    
     st.plotly_chart(fig_small_multiples, use_container_width=True)
+
 elif current_page == "page4":
     st.title("Airbnb Paris Dashboard - Page 4")
     st.markdown("### Visualisation des Airbnb autour des monuments")
