@@ -115,7 +115,7 @@ current_page = query_params.get("page", ["visualisation"])[0]
 if current_page not in ["page1", "page2", "page3", "page4"]:
     current_page = "page1"
 
-# Affichage des liens de navigation
+# Affichage des liens de navigation en haut de page
 st.markdown("""
 <div class="nav-links">
     <a href="?page=page1" target="_self">Tableau de Bord</a>
