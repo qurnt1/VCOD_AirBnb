@@ -139,7 +139,7 @@ def load_data():
     
     # Remplacement des valeurs dans la colonne 'room_type' pour plus de lisibilité
     df['room_type'] = df['room_type'].replace({
-        'Entire home/apt': 'Appartement entier',
+        'Entire home/apt': 'Appart entier',
         'Hotel room': 'Chambre d\'hôtel',
         'Private room': 'Chambre privée',
         'Shared room': 'Chambre partagée'
