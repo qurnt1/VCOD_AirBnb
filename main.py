@@ -18,90 +18,91 @@ st.markdown(
     <style>
         /* 🌑 Mode sombre global */
         html, body, .stApp {
-            background-color: #0E1117 !important;  # Couleur de fond sombre
-            color: white !important;  # Couleur du texte en blanc
+            background-color: #0E1117 !important;
+            color: white !important;
         }
     
         /* 🔲 Conteneur principal */
         [data-testid="stAppViewContainer"], [data-testid="block-container"] {
-            background-color: #0E1117 !important;  # Fond sombre pour les conteneurs principaux
+            background-color: #0E1117 !important;
         }
     
         /* 🌑 Sidebar et son icône */
         [data-testid="stSidebar"], .css-1d391kg {
-            background-color: #0E1117 !important;  # Fond sombre pour la sidebar
-            color: white !important;  # Texte en blanc dans la sidebar
+            background-color: #0E1117 !important;
+            color: white !important;
         }
     
         /* 🎨 Titres et texte */
         h1, h2, h3, h4, h5, h6, p, label, span {
-            color: white !important;  # Tous les textes de titres et labels en blanc
+            color: white !important;
         }
     
         /* 📌 Fix de la barre blanche en haut */
         [data-testid="stHeader"], header {
-            background: #0E1117 !important;  # Fond sombre pour l'en-tête
+            background: #0E1117 !important;
         }
     
         /* 📌 Multiselect & autres inputs */
         .stMultiSelect div[data-baseweb="select"] {
-            background-color: #1E222A !important;  # Fond sombre pour le multiselect
-            color: white !important;  # Texte en blanc dans les éléments du multiselect
+            background-color: #1E222A !important;
+            color: white !important;
         }
         .stMultiSelect div[data-baseweb="select"] div {
-            background-color: #1E222A !important;  # Fond sombre dans les sous-éléments du multiselect
-            color: white !important;  # Texte en blanc dans les sous-éléments
+            background-color: #1E222A !important;
+            color: white !important;
         }
     
         /* 📊 Valeurs des 'metric()' en blanc */
         div[data-testid="metric-container"] {
-            color: white !important;  # Texte des métriques en blanc
+            color: white !important;
         }
         div[data-testid="metric-container"] > label {
-            color: white !important;  # Labels des métriques en blanc
+            color: white !important;
         }
     
         /* 🎨 Légende des graphiques */
         .legendtext {
-            fill: white !important;  # Texte des légendes des graphiques en blanc
+            fill: white !important;
         }
 
         /* 🏠 Barre de navigation */
         .nav-links {
-            background-color: #0E1117;  # Fond sombre pour la barre de navigation
-            padding: 10px;  # Espacement autour des éléments de la barre de navigation
-            text-align: center;  # Alignement du texte au centre
-            margin-bottom: 20px;  # Marge en bas de la barre de navigation
+            background-color: #0E1117; /* Fond sombre */
+            padding: 10px; /* Espacement autour des éléments */
+            text-align: center; /* Alignement du texte au centre */
+            margin-bottom: 20px; /* Marge en bas */
         }
         .nav-links a {
-            margin: 0 15px;  # Espacement entre les liens de la barre de navigation
-            text-decoration: none;  # Suppression de la décoration par défaut des liens
-            font-weight: bold;  # Texte des liens en gras
-            color: white !important;  # Couleur des liens en blanc
-            background-color: #ff5d57;  # Couleur de fond des liens
-            padding: 10px 20px;  # Espacement interne des liens
-            border-radius: 5px;  # Coins arrondis pour les liens
-            display: inline-block;  # Disposition des liens en ligne
+            margin: 0 15px; /* Espacement entre les liens */
+            text-decoration: none; /* Retirer la décoration par défaut */
+            font-weight: bold; /* Texte en gras */
+            color: white !important; /* Texte en blanc */
+            background-color: #ff5d57; /* Fond des boutons */
+            padding: 10px 20px; /* Espacement interne pour les boutons */
+            border-radius: 25px; /* Bord arrondi pour rendre les boutons ronds */
+            display: inline-block; /* Disposition des liens en ligne */
+            transition: background-color 0.3s ease; /* Effet de transition pour le survol */
         }
         .nav-links a:hover {
-            background-color: #e04b45;  # Couleur de fond au survol des liens
+            background-color: #e04b45; /* Changer la couleur de fond au survol */
         }
 
         /* 🎨 Personnalisation du bouton de téléchargement */
         .stDownloadButton button {
-            background-color: #0E1117 !important;  # Fond sombre pour le bouton de téléchargement
-            color: #ff5d57 !important;  # Couleur du texte du bouton
-            font-weight: bold;  # Texte du bouton en gras
-            padding: 10px 20px;  # Espacement interne du bouton
-            border-radius: 5px;  # Coins arrondis du bouton
+            background-color: #0E1117 !important;
+            color: #ff5d57 !important;
+            font-weight: bold;
+            padding: 10px 20px;
+            border-radius: 25px; /* Rendre le bouton rond */
         }
         .stDownloadButton button:hover {
-            background-color: #ff5d57 !important;  # Couleur de fond au survol du bouton
-            color: white !important;  # Texte du bouton en blanc au survol
+            background-color: #ff5d57 !important;
+            color: white !important;
         }
     
     </style>
-    """, unsafe_allow_html=True  # Appliquer le style CSS directement dans le fichier HTML
+    """, unsafe_allow_html=True
 )
 
 # Détecter le paramètre de l'URL pour déterminer la page active
@@ -813,7 +814,7 @@ elif current_page == "page4":
 
     # Affichage de la carte avec les Airbnb autour du monument
     st.plotly_chart(fig_map, use_container_width=True)
-    
+
     # Ajout d'un lien vers l'annonce Airbnb au survol des points de la carte
     for i, d in enumerate(fig_map.data):
         d.hovertemplate += "<br>%{customdata[0]}"  # Affichage du lien au survol
