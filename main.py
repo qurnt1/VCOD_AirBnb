@@ -812,9 +812,6 @@ elif current_page == "page4":
         )
     )
 
-    # Affichage de la carte avec les Airbnb autour du monument
-    st.plotly_chart(fig_map, use_container_width=True)
-
     # Ajout d'un lien vers l'annonce Airbnb au survol des points de la carte
     for i, d in enumerate(fig_map.data):
         d.hovertemplate += "<br>%{customdata[0]}"  # Affichage du lien au survol
