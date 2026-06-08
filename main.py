@@ -106,12 +106,13 @@ st.markdown(
 )
 
 # Détecter le paramètre de l'URL pour déterminer la page active
-query_params = st.experimental_get_query_params()
+if hasattr(st, "query_params"):
+    current_page = st.query_params.get("page", "page1")
+else:
+    query_params = st.experimental_get_query_params()
+    current_page = query_params.get("page", ["page1"])[0]
 
-# Récupération du paramètre "page" de l'URL, valeur par défaut = "visualisation"
-current_page = query_params.get("page", ["visualisation"])[0]
-
-# Si le paramètre "page" est absent ou mal formé, définir "visualisation" comme page par défaut
+# Si le paramètre "page" est absent ou mal formé, définir "page1" comme page par défaut
 if current_page not in ["page1", "page2", "page3", "page4"]:
     current_page = "page1"
 
